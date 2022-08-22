@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+require('dotenv').config();
+import { filterImageFromURL, deleteLocalFiles } from './util/util';
 
 (async () => {
 
@@ -9,7 +10,9 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   // Set the network port
   const port = process.env.PORT || 8082;
-  
+
+  const jwt = require("jsonwebtoken")
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -27,20 +30,72 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   // RETURNS
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
+  app.get("/filteredimage", async (req, res) => {
+
+    if (req.headers.authorization) {
+
+      // get image url param from request queries
+      let { image_url } = req.query
+
+      // validate the image_url query
+      if (!image_url) {
+        res.status(400).send("Image Url not passed!")
+      }
+
+      const authenHeader = req.headers.authorization
+      const token = authenHeader.split(" ")[1]
+      // console.log(token)
+
+      const accessToken = jwt.sign(image_url, process.env.BEARER_TOKEN)
+      // console.log(accessToken)
+
+      try {
+
+        const validateHeader = await jwt.verify(accessToken, token)
+
+        if (validateHeader) {
+          // filter image from URL provided
+          let filteredImageURL = await filterImageFromURL(image_url).then(result => result);
+  
+          // send file as response for resulting filtered image
+          res.status(200).sendFile(filteredImageURL);
+  
+          // delete locally saved file after 8 seconds
+          setTimeout(() => {
+            deleteLocalFiles([filteredImageURL])
+          }, 8000);
+        } else {
+          res.status(400).send("Invalid Auth Token!");
+        }
+
+      } catch(err) {
+        res.status(400).send(`Error - Auth Token! - ${err}`);
+      }
+
+      
+
+      
+
+    } else {
+      res.status(400).send("You are not authorized to access this resource!");
+    }
+
+  });
+
   /**************************************************************************** */
 
   //! END @TODO1
-  
+
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
+  app.get("/", async (req, res) => {
     res.send("try GET /filteredimage?image_url={{}}")
-  } );
-  
+  });
+
 
   // Start the Server
-  app.listen( port, () => {
-      console.log( `server running http://localhost:${ port }` );
-      console.log( `press CTRL+C to stop server` );
-  } );
+  app.listen(port, () => {
+    console.log(`server running http://localhost:${port}`);
+    console.log(`press CTRL+C to stop server`);
+  });
 })();
