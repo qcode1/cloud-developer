@@ -1,0 +1,5 @@
+ENDPOINT URL = http://image-filter-qu-dev-dev.us-east-1.elasticbeanstalk.com
+
+API URL = http://image-filter-qu-dev-dev.us-east-1.elasticbeanstalk.com/filteredimage?image_url=https://upload.wikimedia.org/wikipedia/commons/d/d3/Balls.JPG
+
+AUTH KEY = Available in postman collection (File: cloud-cdnd-c2-final.postman_collection.json)
