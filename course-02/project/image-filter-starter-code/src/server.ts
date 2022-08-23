@@ -69,7 +69,7 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
         }
 
       } catch(err) {
-        res.status(400).send(`Error - Auth Token! - ${err}`);
+        res.status(400).send(`Error - ${err}`);
       }
 
       
