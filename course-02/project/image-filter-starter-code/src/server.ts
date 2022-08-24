@@ -1,4 +1,5 @@
 import express from 'express';
+import {Request, Response} from 'express';
 import bodyParser from 'body-parser';
 require('dotenv').config();
 import { filterImageFromURL, deleteLocalFiles } from './util/util';
@@ -30,12 +31,12 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
   // RETURNS
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
-  app.get("/filteredimage", async (req, res) => {
+  app.get("/filteredimage", async (req: Request, res: Response) => {
 
     if (req.headers.authorization) {
 
       // get image url param from request queries
-      let { image_url } = req.query
+      let { image_url } :{image_url:string} = req.query
 
       // validate the image_url query
       if (!image_url) {
@@ -72,9 +73,6 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
         res.status(400).send(`Error - ${err}`);
       }
 
-      
-
-      
 
     } else {
       res.status(400).send("You are not authorized to access this resource!");
